@@ -10,12 +10,12 @@ import org.apache.avro.Schema
 
 class KafkaProducerAction[K, V](producerProtocol: KafkaProducerProtocol[K, V],
                           statsEngine: StatsEngine,
-                          nextAction: Action, schema: Option[Schema] = None)
+                          nextAction: Action, schema: Option[Schema] = None, byteDataSize: () => Int)
   extends ChainableAction {
   override def execute(session: Session): Unit = {
     val start = TimeHelper.nowMillis
     try {
-      producerProtocol.call(session, schema)
+      producerProtocol.call(session, schema, byteDataSize: () => Int)
       val end = TimeHelper.nowMillis
 
       statsEngine.logResponse(session, "test",

@@ -4,42 +4,52 @@ import io.gatling.core.Predef.Session
 import io.gatling.core.protocol.Protocol
 import io.gatling.data.generator.RandomDataGenerator
 import org.apache.avro.generic.GenericData.Record
-import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.avro.generic.GenericRecord
+import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
+import scala.util.Random
+
 class KafkaProducerProtocol[K: Manifest, V: Manifest](props: java.util.HashMap[String, Object],
-                                  topics: String,
+                                  topics: Array[String], numberOfProducers: Int,
                                   dataGenerator: RandomDataGenerator[K, V] = null)
   extends Protocol {
-  private final val kafkaProducer = new KafkaProducer[K, V](props)
 
+  private val kafkaProducers = new Array[KafkaProducer[K, V]](numberOfProducers)
+  for ( i <- 0 until numberOfProducers) {
+    kafkaProducers(i) = new KafkaProducer[K, V](props)
+  }
+  println(s"Created kafkaProducer with $props")
   private var key: K = _
   private var value: V = _
 
   def call(session: Session,
-           schema: Option[Schema] = None): Unit = {
+           schema: Option[Schema] = None, byteDataSize: () => Int): Unit = {
     val attributes = session.attributes
 
     if (attributes.nonEmpty) {
       if (manifest[K].runtimeClass.isArray &&
-          manifest[V].runtimeClass.isArray) {
+        manifest[V].runtimeClass.isArray) {
         key = attributes.toString().getBytes().asInstanceOf[K]
         value = attributes.toString().getBytes().asInstanceOf[V]
       } else {
         key = createRecordForAvroSchema(attributes).asInstanceOf[K]
         value = createRecordForAvroSchema(attributes).asInstanceOf[V]
       }
-    } else if (schema.nonEmpty) {
-      key = dataGenerator.generateKey(schema)
-      value = dataGenerator.generateValue(schema)
     } else {
-      key = dataGenerator.generateKey()
-      value = dataGenerator.generateValue()
+        key = dataGenerator.generateKey(schema, byteDataSize)
+        value = dataGenerator.generateValue(schema, byteDataSize)
     }
+    if (!topics.isEmpty) {
+      val record = new ProducerRecord[K, V](topics(Random.nextInt(topics.length)), key, value)
+      val result = kafkaProducers(Random.nextInt(kafkaProducers.length)).send(record)
+    }
+//
+//    for( topic  <- topics) {
+//      val record = new ProducerRecord[K, V](topic, key, value)
+//      val result = kafkaProducer.send(record)
+//    }
 
-    val record = new ProducerRecord[K, V](topics, key, value)
-    kafkaProducer.send(record)
   }
 
   private def createRecordForAvroSchema(attributes: Map[String, Any]): GenericRecord = {

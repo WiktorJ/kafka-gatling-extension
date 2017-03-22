@@ -10,7 +10,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.producer.ProducerConfig
 
 class FeederSimulationWithAvroSchema extends Simulation {
-  val kafkaTopic = "test_topic"
+  val kafkaTopic = Array("test_topic")
   val kafkaBrokers = "localhost:9092"
 
   val props = new util.HashMap[String, Object]()
@@ -20,7 +20,7 @@ class FeederSimulationWithAvroSchema extends Simulation {
   props.put("schema.registry.url", "http://locahost:8081")
 
   val kafkaProducerProtocol =
-    new KafkaProducerProtocol[GenericRecord, GenericRecord](props, kafkaTopic)
+    new KafkaProducerProtocol[GenericRecord, GenericRecord](props, kafkaTopic, 1)
 
   val scn = scenario("Kafka Producer Call").feed(csv("test_data1.csv").circular)
     .exec(KafkaProducerBuilder[GenericRecord, GenericRecord]())

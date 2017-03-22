@@ -6,7 +6,7 @@ import io.gatling.core.protocol.Protocols
 import io.gatling.core.structure.ScenarioContext
 import org.apache.avro.Schema
 
-case class KafkaProducerBuilder[K, V](schema: Option[Schema] = None) extends ActionBuilder {
+case class KafkaProducerBuilder[K, V](schema: Option[Schema] = None, byteDataSize: () => Int  = () => 100) extends ActionBuilder {
   def kafkaProducerProtocol(protocols: Protocols): KafkaProducerProtocol[K, V] = {
     protocols.protocol[KafkaProducerProtocol[K, V]].getOrElse(
       throw new UnsupportedOperationException("KafkaProducerProtocol was not registered"))
@@ -15,6 +15,6 @@ case class KafkaProducerBuilder[K, V](schema: Option[Schema] = None) extends Act
   override def build(ctx: ScenarioContext, next: Action): Action = {
     new KafkaProducerAction(
       kafkaProducerProtocol(ctx.protocolComponentsRegistry.protocols),
-      ctx.coreComponents.statsEngine, next, schema)
+      ctx.coreComponents.statsEngine, next, schema, byteDataSize)
   }
 }

@@ -11,7 +11,7 @@ import org.apache.kafka.common.serialization.IntegerSerializer
 import scala.concurrent.duration._
 
 class SimulationWithCustomData extends Simulation {
-  val kafkaTopic = "test_topic"
+  val kafkaTopic = Array("test_topic")
   val kafkaBrokers = "localhost:9092"
 
   val props = new util.HashMap[String, Object]()
@@ -20,7 +20,7 @@ class SimulationWithCustomData extends Simulation {
   props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[IntegerSerializer])
 
   val dataGenerator = new RandomDataGeneratorExt()
-  val kafkaProducerProtocol = new KafkaProducerProtocol[Int, Int](props, kafkaTopic,
+  val kafkaProducerProtocol = new KafkaProducerProtocol[Int, Int](props, kafkaTopic, 1,
     dataGenerator)
 
   val scn = scenario("Sequential data simulation").exec(KafkaProducerBuilder[Int, Int]())

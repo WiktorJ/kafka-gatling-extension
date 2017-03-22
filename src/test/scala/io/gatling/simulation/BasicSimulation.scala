@@ -10,7 +10,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 
 class BasicSimulation extends Simulation {
-  val kafkaTopic = "test_topic"
+  val kafkaTopic = Array("test_topic")
   val kafkaBrokers = "localhost:9092"
 
   val props = new util.HashMap[String, Object]()
@@ -19,7 +19,7 @@ class BasicSimulation extends Simulation {
   props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
 
   val dataGenerator = new RandomDataGenerator[String, String]()
-  val kafkaProducerProtocol = new KafkaProducerProtocol[String, String](props, kafkaTopic,
+  val kafkaProducerProtocol = new KafkaProducerProtocol[String, String](props, kafkaTopic, 1,
     dataGenerator)
   val scn = scenario("Kafka Producer Call").exec(KafkaProducerBuilder[String, String]())
 

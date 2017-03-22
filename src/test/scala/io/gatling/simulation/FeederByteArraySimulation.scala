@@ -9,7 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.ByteArraySerializer
 
 class FeederByteArraySimulation extends Simulation {
-  val kafkaTopic = "test_topic"
+  val kafkaTopic = Array("test_topic")
   val kafkaBrokers = "localhost:9092"
 
   val props = new util.HashMap[String, Object]()
@@ -20,7 +20,7 @@ class FeederByteArraySimulation extends Simulation {
     classOf[ByteArraySerializer])
 
   val kafkaProducerProtocol =
-    new KafkaProducerProtocol[Array[Byte], Array[Byte]](props, kafkaTopic)
+    new KafkaProducerProtocol[Array[Byte], Array[Byte]](props, kafkaTopic, 1)
   val scn = scenario("Kafka Producer Call")
     .feed(csv("test_data1.csv").circular)
     .exec(KafkaProducerBuilder[Array[Byte], Array[Byte]]())

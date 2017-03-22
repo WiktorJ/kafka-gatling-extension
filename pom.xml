@@ -6,15 +6,16 @@
 
     <groupId>io.gatling</groupId>
     <artifactId>kafka-gatling-extension</artifactId>
-    <version>1.0</version>
+    <version>1.4.0</version>
 
     <properties>
         <gatling.version>2.2.2</gatling.version>
         <gatling-plugin.version>2.2.0</gatling-plugin.version>
         <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
-        <kafka.version>0.10.0.1-cp1</kafka.version>
+        <kafka.version>0.10.1.1-cp1</kafka.version>
         <avro.version>1.8.1</avro.version>
-        <confluent.version>3.0.1</confluent.version>
+        <confluent.version>3.1.2</confluent.version>
+        <scalatest.version>3.0.1</scalatest.version>
     </properties>
 
     <repositories>
@@ -55,6 +56,12 @@
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
             <version>${confluent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.11</artifactId>
+            <version>${scalatest.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
