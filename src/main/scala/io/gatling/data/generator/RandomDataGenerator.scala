@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.{GenericData, GenericRecord}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.Random
 
 class RandomDataGenerator[K: Manifest, V: Manifest] {
@@ -24,7 +25,9 @@ class RandomDataGenerator[K: Manifest, V: Manifest] {
   private final val AnyManifest = manifest[Any]
   private final val AnyRefManifest = manifest[AnyRef]
   private final val GenericRecordManifest = manifest[GenericRecord]
-  private final val genericData = new GenericData();
+  private final val genericData = new GenericData()
+  private final val randomDataMap = new mutable.HashMap[Int, Array[Byte]]()
+
   def generateKey(schema: Option[Schema] = None, byteDataSize: () => Int = () => 100): K = {
     genByManifest[K](schema, byteDataSize)
   }
@@ -54,7 +57,12 @@ class RandomDataGenerator[K: Manifest, V: Manifest] {
   }
 
   protected def generateRandomByteData(f: () => Int): Array[Byte] = {
-    val arr: Array[Byte] = new Array[Byte](f())
+    val arrayLength = f()
+    randomDataMap.getOrElseUpdate(arrayLength, createNewBytes(arrayLength))
+  }
+
+  private def createNewBytes(size: Int): Array[Byte] = {
+    val arr = new Array[Byte](size)
     Random.nextBytes(arr)
     arr
   }
